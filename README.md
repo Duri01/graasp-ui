@@ -1,4 +1,4 @@
-# Graasp UI
+# Graasp UI 
 
 > React components for the Graasp ecosystem.
 
