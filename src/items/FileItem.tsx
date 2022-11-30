@@ -25,9 +25,13 @@ import withCaption from './withCaption';
 
 export interface FileItemProps {
   /**
-   * blob content of the file
+   * blob content of the file, overriden by fileUrl
    * */
-  content: Blob;
+  content?: Blob;
+  /**
+   * url of the file, overrides content
+   * */
+  fileUrl?: string;
   defaultItem?: JSX.Element;
   downloadText?: string;
   editCaption?: boolean;
@@ -36,6 +40,10 @@ export interface FileItemProps {
   item: RecordOf<Item<UnknownExtra>>;
   maxHeight?: number;
   onSaveCaption?: (text: string) => void;
+  /**
+   * use a custom pdf reader from the link if defined
+   * */
+  pdfViewerLink?: string;
   saveButtonId?: string;
   showCaption?: boolean;
   showCollapse?: boolean;
@@ -44,6 +52,7 @@ export interface FileItemProps {
 
 const FileItem: FC<FileItemProps> = ({
   content,
+  fileUrl,
   defaultItem,
   downloadText,
   editCaption = false,
@@ -56,6 +65,7 @@ const FileItem: FC<FileItemProps> = ({
   showCaption = true,
   showCollapse,
   sx,
+  pdfViewerLink,
 }) => {
   const [url, setUrl] = useState<string>();
   const extra =
@@ -66,24 +76,26 @@ const FileItem: FC<FileItemProps> = ({
 
   useEffect(() => {
     (async () => {
-      if (content) {
+      if (fileUrl) {
+        setUrl(fileUrl);
+      } else if (content) {
         // Build a URL from the file
-        const fileURL = URL.createObjectURL(content);
-        if (fileURL) {
-          setUrl(fileURL);
+        const urlFromContent = URL.createObjectURL(content);
+        if (urlFromContent) {
+          setUrl(urlFromContent);
         } else {
           setUrl(ERRORS.BLOB_URL);
         }
       }
 
       return () => {
-        if (url) {
+        if (content && url) {
           URL.revokeObjectURL(url);
         }
       };
     })();
     // does not include url to avoid infinite loop
-  }, [content]);
+  }, [content, fileUrl]);
 
   if (!url) {
     return (
@@ -116,6 +128,7 @@ const FileItem: FC<FileItemProps> = ({
           height={maxHeight}
           sx={sx}
           showCollapse={showCollapse}
+          pdfViewerLink={pdfViewerLink}
         />
       );
     }

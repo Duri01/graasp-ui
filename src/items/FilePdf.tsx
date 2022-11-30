@@ -10,6 +10,10 @@ interface FilePdfProps {
   height?: number | string;
   sx?: SxProps;
   showCollapse?: boolean;
+  /**
+   * use a custom pdf reader from the link if defined
+   * */
+  pdfViewerLink?: string;
 }
 
 const StyledEmbed = styled('embed')({
@@ -22,6 +26,7 @@ const FilePdf: FC<FilePdfProps> = ({
   sx,
   height: defaultHeight,
   showCollapse,
+  pdfViewerLink,
 }) => {
   const embedRef = useRef<HTMLEmbedElement>(null);
   const [height, setHeight] = useState<number | string>(
@@ -38,11 +43,17 @@ const FilePdf: FC<FilePdfProps> = ({
     }
   };
 
+  // use custom pdf viewer if defined
+  let urlWithPdfViewer = url;
+  if (pdfViewerLink) {
+    urlWithPdfViewer = `${pdfViewerLink}${encodeURIComponent(url)}`;
+  }
+
   return (
     <StyledEmbed
       ref={embedRef}
       id={id}
-      src={url}
+      src={urlWithPdfViewer}
       width='100%'
       height={height || '100%'}
       onLoad={onLoad}
